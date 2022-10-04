@@ -1,0 +1,60 @@
+# ===========================================
+# A traefik recipe to deliver the traefik service.
+#
+# @author Björn Hempel <bjoern@hempel.de>
+# @version 1.0 (2022-10-04)
+# ===========================================
+
+# ===========================================
+# This docker-compose.yml file can be used individually.
+#
+# Preparation
+# ----------
+# ❯ docker network create traefik
+# ===========================================
+
+# Use docker compose version 3.8
+version: '3.8'
+
+# configure services
+services:
+
+  # The traefik service.
+  traefik:
+    image: "arm64v8/traefik:2.9"
+    container_name: "${NAMESPACE_DEVELOPMENT}.traefik"
+    command:
+      # Set log level
+      - "--log.level=DEBUG"
+      # API settings
+      - "--api.insecure=true"
+      # Docker configuration
+      - "--providers.docker=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=${NETWORK_NAME_TRAEFIK}"
+      # Configure entrypoints
+      - "--entrypoints.web.address=:${EXPOSE_TRAEFIK_PORT_HTTP}"
+      - "--entrypoints.websecure.address=:${EXPOSE_TRAEFIK_PORT_HTTPS}"
+    restart: always
+    ports:
+      # Main port (if you have direct access to 80/443)
+      - "${EXPOSE_TRAEFIK_PORT_HTTP}:80"
+      - "${EXPOSE_TRAEFIK_PORT_HTTPS}:443"
+      # Main port (if you do not have direct access to 80/443)
+      - "${EXPOSE_TRAEFIK_PORT_HTTP_ALTERNATIVE}:80"
+      - "${EXPOSE_TRAEFIK_PORT_HTTPS_ALTERNATIVE}:443"
+      # Web UI port
+      - "${EXPOSE_WEBUI_PORT}:8080" # The Web UI (enabled by --api)
+    networks:
+      - traefik
+    volumes:
+      - ./tools/certs:/tools/certs
+      - ./tools/traefik/config.yml:/etc/traefik/dynamic_conf/conf.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+
+# configure networks
+networks:
+  traefik:
+    external: true
+    name: ${NETWORK_NAME_TRAEFIK}

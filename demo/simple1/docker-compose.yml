@@ -1,0 +1,47 @@
+# ===========================================
+# A docker compose recipe to deliver the given html folder.
+#
+# @author Björn Hempel <bjoern@hempel.de>
+# @version 0.1.0 (2022-10-04)
+# ===========================================
+
+# ===========================================
+# This docker-compose.yml file can be used individually.
+# ===========================================
+
+# Use docker compose version 3.8
+version: '3.8'
+
+# configure services
+services:
+
+  # Serve the project 1.
+  application:
+    image: arm64v8/nginx:latest
+    labels:
+      # enable traefik
+      - "traefik.enable=true"
+      # middleware
+      - "traefik.http.middlewares.${NAMESPACE_HOSTNAME_UNDERLINE}_https.redirectscheme.scheme=https"
+      # simple 1 project (http)
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_http.entrypoints=web"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_http.rule=Host(`${URL_LOCAL}`)"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_http.middlewares=${NAMESPACE_HOSTNAME_UNDERLINE}_https"
+      # simple 1 project (https)
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_https.entrypoints=websecure"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_https.rule=Host(`${URL_LOCAL}`)"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_https.tls=true"
+      # network
+      - "traefik.docker.network=${NETWORK_NAME_TRAEFIK}"
+
+    volumes:
+      - ./html:/usr/share/nginx/html
+    networks:
+      - traefik
+    restart: always
+
+# configure networks
+networks:
+  traefik: # ${NETWORK_NAME_TRAEFIK}
+    external: true
+    name: "${NETWORK_NAME_TRAEFIK}"
