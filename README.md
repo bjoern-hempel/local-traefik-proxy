@@ -58,7 +58,7 @@ docker compose up -d
 cd demo/simple1 && docker compose up -d
 ```
 
-* Open [http://simple1.localhost](http://simple1.localhost/)
+* Open [https://simple1.localhost](https://simple1.localhost/)
 
 ```bash
 docker compose down
@@ -70,7 +70,7 @@ docker compose down
 cd demo/simple2 && docker compose up -d
 ```
 
-* Open [http://simple2.localhost](http://simple2.localhost/)
+* Open [https://simple2.localhost](https://simple2.localhost/)
 
 ```bash
 docker compose down
