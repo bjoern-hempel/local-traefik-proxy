@@ -76,6 +76,66 @@ cd demo/simple2 && docker compose up -d
 docker compose down
 ```
 
+## Start own container
+
+### Example 1
+
+Minimal example.
+
+#### `.env`
+
+```dotenv
+# Namespace to use for host name variables (hostname safe)
+NAMESPACE_UNDERLINE=de_ixno_simple_1
+
+# Namespace to use for host name variables (hostname safe) (development)
+NAMESPACE_HOSTNAME_UNDERLINE=${NAMESPACE_UNDERLINE}_development
+
+# The URL of this project
+URL_LOCAL=simple1.localhost
+
+# Traefik network name
+NETWORK_NAME_TRAEFIK=traefik
+```
+
+#### `docker-compose.yml`
+
+```bash
+# Use docker compose version 3.8
+version: '3.8'
+
+# configure services
+services:
+
+  # Serve the project 1.
+  application:
+    image: arm64v8/nginx:latest
+    labels:
+      # enable traefik
+      - "traefik.enable=true"
+      # middleware
+      - "traefik.http.middlewares.${NAMESPACE_HOSTNAME_UNDERLINE}_https.redirectscheme.scheme=https"
+      # simple 1 project (http)
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_http.entrypoints=web"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_http.rule=Host(`${URL_LOCAL}`)"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_http.middlewares=${NAMESPACE_HOSTNAME_UNDERLINE}_https"
+      # simple 1 project (https)
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_https.entrypoints=websecure"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_https.rule=Host(`${URL_LOCAL}`)"
+      - "traefik.http.routers.${NAMESPACE_HOSTNAME_UNDERLINE}_https.tls=true"
+      # network
+      - "traefik.docker.network=${NETWORK_NAME_TRAEFIK}"
+    networks:
+      - traefik
+    ...
+    
+# configure networks
+networks:
+  traefik: # ${NETWORK_NAME_TRAEFIK}
+    external: true
+    name: "${NETWORK_NAME_TRAEFIK}"
+```
+
 ## Create your own certificate
 
 ```bash

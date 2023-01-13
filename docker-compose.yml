@@ -21,7 +21,7 @@ services:
 
   # The traefik service.
   traefik:
-    image: "arm64v8/traefik:2.9"
+    image: "traefik:2.9"
     container_name: "${NAMESPACE_DEVELOPMENT}.traefik"
     command:
       # Set log level
@@ -33,9 +33,17 @@ services:
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=${NETWORK_NAME_TRAEFIK}"
+      # Certificates
+      - "--serverstransport.insecureskipverify=true"
+      #- "--providers.docker.tls.insecureskipverify=true"
       # Configure entrypoints
       - "--entrypoints.web.address=:${EXPOSE_TRAEFIK_PORT_HTTP}"
       - "--entrypoints.websecure.address=:${EXPOSE_TRAEFIK_PORT_HTTPS}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.api.service=api@internal"
     restart: always
     ports:
       # Main port (if you have direct access to 80/443)
