@@ -21,7 +21,7 @@ services:
 
   # The traefik service.
   traefik:
-    image: "traefik:2.9"
+    image: "traefik:2.9.10"
     container_name: "${NAMESPACE_DEVELOPMENT}.traefik"
     command:
       # Set log level
