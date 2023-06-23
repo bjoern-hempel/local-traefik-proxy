@@ -231,6 +231,28 @@ networks:
 
 ## Create your own certificate
 
+See: https://medium.com/@tbusser/creating-a-browser-trusted-self-signed-ssl-certificate-2709ce43fd15
+
+### Create root certificate
+
 ```bash
-openssl req -x509 -nodes -days 3650 -newkey rsa:4096 -keyout ./tools/certs/cert.key -out ./tools/certs/cert.crt -subj "/C=DE/ST=Saxony/L=Dresden/O=Ixnode/OU=IT/CN=localhost"
+cd certs
+```
+
+```bash
+openssl genrsa -des3 -out rootCA.key 2048
+```
+
+```bash
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 3650 -out rootCA.pem -subj "/C=DE/ST=Saxony/L=Dresden/O=Ixnode/OU=IT/CN=IXNODE ROOT"
+```
+
+### Create self signed certificate
+
+```bash
+openssl req -new -nodes -out server.csr -newkey rsa:2048 -keyout server.key -subj "/C=DE/ST=Saxony/L=Dresden/O=Ixnode/OU=IT/CN=IXNODE DEV"
+```
+
+```bash
+openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 500 -sha256 -extfile v3.ext
 ```

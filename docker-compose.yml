@@ -28,14 +28,16 @@ services:
       - "--log.level=DEBUG"
       # API settings
       - "--api.insecure=true"
+      - "--api.dashboard=true"
       # Docker configuration
       - "--providers.docker=true"
       - "--providers.docker.endpoint=unix:///var/run/docker.sock"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=${NETWORK_NAME_TRAEFIK}"
+      - "--providers.file.directory=/etc/traefik/dynamic_conf"
+      - "--providers.file.watch=true"
       # Certificates
       - "--serverstransport.insecureskipverify=true"
-      #- "--providers.docker.tls.insecureskipverify=true"
       # Configure entrypoints
       - "--entrypoints.web.address=:${EXPOSE_TRAEFIK_PORT_HTTP}"
       - "--entrypoints.websecure.address=:${EXPOSE_TRAEFIK_PORT_HTTPS}"
@@ -57,8 +59,8 @@ services:
     networks:
       - traefik
     volumes:
-      - ./tools/certs:/tools/certs
-      - ./tools/traefik/config.yml:/etc/traefik/dynamic_conf/conf.yml:ro
+      - ./certs:/certs
+      - ./conf/traefik/config.yml:/etc/traefik/dynamic_conf/conf.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock
 
 # configure networks
