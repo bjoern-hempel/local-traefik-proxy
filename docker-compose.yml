@@ -13,9 +13,6 @@
 # ❯ docker network create traefik
 # ===========================================
 
-# Use docker compose version 3.8
-version: '3.8'
-
 # configure services
 services:
 
