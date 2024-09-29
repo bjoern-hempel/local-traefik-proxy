@@ -40,7 +40,9 @@ services:
       - "--serverstransport.insecureskipverify=true"
       # Configure entrypoints
       - "--entrypoints.web.address=:${EXPOSE_TRAEFIK_PORT_HTTP}"
+      - "--entrypoints.web.forwardedHeaders.insecure=true"
       - "--entrypoints.websecure.address=:${EXPOSE_TRAEFIK_PORT_HTTPS}"
+      - "--entrypoints.websecure.forwardedHeaders.insecure=true"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.entrypoints=web"
